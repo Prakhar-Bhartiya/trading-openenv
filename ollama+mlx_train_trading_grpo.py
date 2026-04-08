@@ -10,8 +10,8 @@ Architecture:
   - TradingEnvironment (backtest mode) → SimulatedBroker with yfinance historical data
 
 Usage:
-  python train_trading_grpo.py
-  python train_trading_grpo.py --max-train-steps 10 --num-episodes 2  # quick smoke test
+  python ollama+mlx_train_trading_grpo.py
+  python ollama+mlx_train_trading_grpo.py --max-train-steps 10 --num-episodes 2  # quick smoke test
 """
 
 import argparse

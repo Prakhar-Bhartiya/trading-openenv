@@ -13,7 +13,6 @@ An OpenEnv environment that wraps the Alpaca MCP server.
 import asyncio
 import json
 import os
-import queue
 import sys
 import threading
 from typing import Any, Dict, Optional
@@ -74,7 +73,6 @@ class MCPClientManager:
             
         # Enforce toolset limits to prevent hallucinations
         if "ALPACA_TOOLSETS" not in env:
-            # env["ALPACA_TOOLSETS"] = "account,trading,assets,stock-data"
             env["ALPACA_TOOLSETS"] = "account,trading,stock-data"
             
         server_params = StdioServerParameters(
@@ -301,8 +299,10 @@ class TradingEnvironment(Environment):
                                 est_price = float(quote_data["bp"])
                     except Exception:
                         pass
+                
                 # Virtual funds safety fallback
-            if est_price is None: est_price = 100.0 
+                if est_price is None:
+                    est_price = 100.0 
                 
             est_cost = est_price * qty
             

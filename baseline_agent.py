@@ -43,7 +43,6 @@ if not OPENAI_API_KEY:
     print("   Set it with: export OPENAI_API_KEY='sk-...'")
     sys.exit(1)
 
-# MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.4-mini")
 client = OpenAI(api_key=OPENAI_API_KEY)
 

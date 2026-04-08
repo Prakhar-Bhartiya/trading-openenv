@@ -38,25 +38,18 @@ uv sync
 ### 2. Run the Baseline Agent
 
 ```bash
-export OPENAI_API_KEY="sk-..."
-python inference.py
+export HF_TOKEN="..." 
+uv run python inference.py
 ```
 
 This runs all 3 tasks sequentially and prints scores.
 
-### 3. Run the Rich Visualization Agent
-
-```bash
-export OPENAI_API_KEY="sk-..."  # or any litellm-compatible provider
-python inference.py --max-steps 50
-```
-
-### 4. Start the FastAPI Server
+### 3. Start the FastAPI Server
 
 ```bash
 cd trading
 uv run server
-# Or: uvicorn server.app:app --reload --host 0.0.0.0 --port 8000
+# Or: uv run python -m uvicorn server.app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## Tasks
@@ -144,14 +137,6 @@ trading/
     └── Dockerfile              # Container image definition
 ```
 
-## Deploying to Hugging Face Spaces
-
-```bash
-cd trading
-openenv push
-# Or with options:
-openenv push --namespace my-org --private
-```
 
 ## Development & Testing
 
@@ -170,11 +155,4 @@ action = TradingAction(tool_name="place_stock_order", tool_args={
 })
 obs = env.step(action)
 print(f"Equity: ${obs.account_state.equity:,.2f}, Reward: ${obs.reward:+,.2f}")
-```
-
-### Validate OpenEnv Compliance
-
-```bash
-cd trading
-openenv validate --verbose
 ```
