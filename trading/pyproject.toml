@@ -1,0 +1,41 @@
+# Copyright (c) Meta Platforms, Inc. and affiliates.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-trading"
+version = "0.1.0"
+description = "Trading environment for OpenEnv — RL trading with virtual ledger and historical backtesting"
+requires-python = ">=3.10"
+dependencies = [
+    # Core OpenEnv runtime (provides FastAPI server + HTTP client types)
+    "openenv-core[core]>=0.2.0",
+    # Environment-specific dependencies
+    "yfinance>=0.2.0",
+    "pandas>=1.5.0",
+    "pydantic>=2.0.0",
+    "openai>=1.0.0",
+    "mcp>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+# Server entry point - enables running via: uv run --project . server
+# or: python -m trading.server.app
+server = "trading.server.app:main"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["trading", "trading.server", "trading.tasks"]
+package-dir = { "trading" = ".", "trading.server" = "server", "trading.tasks" = "tasks" }

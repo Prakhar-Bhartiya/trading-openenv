@@ -1,0 +1,32 @@
+spec_version: 1
+name: trading
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+
+description: >
+  An RL trading environment for training LLM agents on stock trading. 
+  Wraps the Alpaca MCP server with a virtual ledger for safe backtesting 
+  against historical market data. Includes 3 tasks (easy/medium/hard) 
+  with deterministic programmatic graders scoring 0.0–1.0.
+
+author: "Prakhar Bhartiya"
+version: "0.1.0"
+
+tasks:
+  - id: capital_preservation
+    name: "Capital Preservation"
+    difficulty: easy
+    max_steps: 20
+    description: "Preserve capital by not losing more than 5% over 20 steps"
+  - id: profitable_episode
+    name: "Profitable Episode"
+    difficulty: medium
+    max_steps: 50
+    description: "Generate positive trading returns over a 50-step episode"
+  - id: drawdown_controlled_alpha
+    name: "Drawdown-Controlled Alpha"
+    difficulty: hard
+    max_steps: 100
+    description: "Maximize returns while keeping maximum drawdown under 10%"
