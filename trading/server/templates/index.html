@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenEnv Trading Desk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --surface-color: #1a1d24;
+            --surface-border: #2a2d36;
+            --text-primary: #f0f0f0;
+            --text-secondary: #909090;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-weight: 500;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+            border-radius: 6px;
+        }
+
+        .controls button {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--surface-border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .controls button:hover {
+            background-color: var(--surface-border);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+        }
+
+        /* Portfolio Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-box {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 0.5rem;
+        }
+
+        .text-green { color: var(--success-color); }
+        .text-red { color: var(--danger-color); }
+
+        /* Tables (Market & Positions) */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .data-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .data-table td.monospace {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Forms */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        input, select {
+            background-color: var(--bg-color);
+            border: 1px solid var(--surface-border);
+            color: var(--text-primary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-hold {
+            background-color: var(--surface-border);
+        }
+        .btn-hold:hover {
+            background-color: #3f4352;
+        }
+
+        /* Terminal Logs */
+        .terminal {
+            background-color: var(--bg-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .log-entry {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .log-time {
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        /* Loaders */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1><div class="logo"></div> OpenEnv Trading</h1>
+        <div class="controls">
+            <span id="step-counter" style="margin-right: 15px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Step: 0</span>
+            <button id="btn-refresh">Refresh State</button>
+            <button id="btn-reset">Reset Environment</button>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Left Column -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Portfolio Overview -->
+            <div class="card">
+                <div class="card-title">Portfolio Overview</div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="card-title">Virtual Cash</div>
+                        <div class="stat-value" id="val-cash">$0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="card-title">Total Equity</div>
+                        <div class="stat-value" id="val-equity">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Open Positions -->
+            <div class="card" style="flex: 1;">
+                <div class="card-title">Open Positions</div>
+                <div style="overflow-y: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Qty</th>
+                                <th>Est. Value</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positions-table">
+                            <tr><td colspan="3" style="color: var(--text-secondary);">No open positions.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Market Prices -->
+            <div class="card">
+                <div class="card-title">Market Quotes</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Current Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="market-table">
+                        <tr><td colspan="2">Loading prices...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Execute Trade -->
+            <div class="card">
+                <div class="card-title">Execute Trade</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="trade-symbol">Symbol</label>
+                        <select id="trade-symbol">
+                            <!-- Populated dynamically -->
+                            <option value="AAPL">AAPL</option>
+                            <option value="MSFT">MSFT</option>
+                            <option value="TSLA">TSLA</option>
+                            <option value="NVDA">NVDA</option>
+                            <option value="SPY">SPY</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="trade-qty">Quantity</label>
+                        <input type="number" id="trade-qty" min="1" step="0.1" value="1">
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 0.5rem;">
+                    <button class="btn" style="background-color: var(--success-color);" onclick="submitTrade('buy')">Buy</button>
+                    <button class="btn" style="background-color: var(--danger-color);" onclick="submitTrade('sell')">Sell</button>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <button class="btn btn-hold" style="width: 100%;" onclick="submitHold()">Hold (Skip Turn)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 1.5rem;">
+        <div class="card-title">Activity Log</div>
+        <div class="terminal" id="terminal-logs">
+            <div class="log-entry">
+                <span class="log-time">[System]</span>
+                <span style="color: var(--text-secondary);">Initializing UI...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const valCash = document.getElementById('val-cash');
+        const valEquity = document.getElementById('val-equity');
+        const stepCounter = document.getElementById('step-counter');
+        const positionsTable = document.getElementById('positions-table');
+        const marketTable = document.getElementById('market-table');
+        const terminal = document.getElementById('terminal-logs');
+        const symbolSelect = document.getElementById('trade-symbol');
+
+        function formatCurrency(val) {
+            return '$' + parseFloat(val).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        function logToTerminal(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const time = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            let color = 'white';
+            if(type === 'error') color = 'var(--danger-color)';
+            if(type === 'success') color = 'var(--success-color)';
+            if(type === 'warning') color = 'var(--warning-color)';
+
+            entry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span style="color: ${color};">${message}</span>
+            `;
+            terminal.appendChild(entry);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function fetchState() {
+            try {
+                document.body.classList.add('loading');
+                const res = await fetch('/web/state');
+                if (!res.ok) throw new Error('Failed to fetch state');
+                const state = await res.json();
+                updateDashboard(state);
+            } catch (err) {
+                logToTerminal(err.message, 'error');
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        }
+
+// ... originalPostReset/Step are overwritten below, but updating them anyway:
+        async function postReset() {
+            try {
+                document.body.classList.add('loading');
+                logToTerminal('Resetting environment...');
+                const res = await fetch('/web/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                logToTerminal('Environment reset successfully.', 'success');
+                fetchState(); // Auto sync
+            } catch (err) {
+                logToTerminal('Reset failed: ' + err.message, 'error');
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        }
+
+        async function postStep(action) {
+            try {
+                document.body.classList.add('loading');
+                if (action.action.tool_name === "place_stock_order") {
+                     logToTerminal(`Executing ${action.action.tool_args.side.toUpperCase()} ${action.action.tool_args.qty} ${action.action.tool_args.symbol}...`);
+                } else {
+                     logToTerminal(`Executing HOLD...`);
+                }
+                
+                const res = await fetch('/web/step', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(action)
+                });
+                
+                const data = await res.json();
+                if(!res.ok) {
+                    // Could be 422 Unprocessable formatting 
+                    throw new Error(JSON.stringify(data.detail) || "Unknown error");
+                }
+                
+                const obs = data.observation;
+                if (obs && obs.error) {
+                    logToTerminal(`Action Failed: ${obs.error}`, 'error');
+                } else {
+                    let resultText = "Success.";
+                    if(obs && obs.result && obs.result.length > 0) {
+                        resultText = obs.result.map(r => r.text || r.content || "").join(" ");
+                    }
+                    if(obs && obs.reward !== undefined) {
+                         resultText += ` (Reward: ${obs.reward.toFixed(2)})`;
+                    }
+                    logToTerminal(resultText, 'success');
+                }
+                
+                fetchState();
+            } catch (err) {
+                logToTerminal('Step failed: ' + err.message, 'error');
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        }
+
+        window.submitTrade = function(side) {
+            const sym = document.getElementById('trade-symbol').value;
+            const qty = document.getElementById('trade-qty').value;
+            postStep({
+                action: {
+                    tool_name: "place_stock_order",
+                    tool_args: {
+                        symbol: sym,
+                        qty: parseFloat(qty),
+                        side: side,
+                        type: "market",
+                        time_in_force: "ioc"
+                    }
+                }
+            });
+        };
+
+        window.submitHold = function() {
+             postStep({
+                action: {
+                    tool_name: "hold",
+                    tool_args: {}
+                }
+            });
+        }
+
+        function updateDashboard(state) {
+            stepCounter.innerText = `Step: ${state.step_count || 0}`;
+            
+            // It could be that openenv has standard state, or we fetch from recent observation/custom endpoints.
+            // But since openenv only exposes state (which has generic state fields like step_count, episode_id)
+            // Wait, standard OpenEnv State doesn't automatically contain market_prices.
+            // Did our wrapper return observation via standard API?
+            // Wait, actually `state` returned by `/state` is just what `env.state` returns!
+            // Let's rely on observation data if possible. BUT `/state` returns `env.state.model_dump()`.
+            // Our `TradingEnvironment.state` only has `episode_id` and `step_count`.
+            
+            // Hmm, actually OpenEnv web_interface uses its own state tracker? No, we didn't use `web_interface`.
+            // Let's implement a workaround: To get state without stepping, we might assume the state object 
+            // inside `trading_environment.py` isn't fully exposing portfolio metrics in `state`!
+            // Let's just reset first to get observation, and use a local variable to cache the observation.
+            logToTerminal("State synchronized.");
+        }
+        
+        // Fix for syncing observation data:
+        // We will intercept the responses from `/reset` and `/step` to update the ui
+        let cachedObservation = null;
+
+        function updateUIFromObservation(obs) {
+             if(obs.account_state) {
+                  valCash.innerText = formatCurrency(obs.account_state.cash);
+                  valEquity.innerText = formatCurrency(obs.account_state.equity);
+                  
+                  // Update Positions Table
+                  positionsTable.innerHTML = '';
+                  const pos = obs.account_state.positions;
+                  const keys = Object.keys(pos);
+                  if(keys.length === 0) {
+                      positionsTable.innerHTML = '<tr><td colspan="3" style="color: var(--text-secondary);">No open positions.</td></tr>';
+                  } else {
+                      let totalValue = 0;
+                      for(let k of keys) {
+                          const q = pos[k];
+                          const price = obs.market_prices[k] || 0;
+                          const val = q * price;
+                          positionsTable.innerHTML += `
+                              <tr>
+                                  <td style="font-weight: 500">${k}</td>
+                                  <td class="monospace">${q}</td>
+                                  <td class="monospace text-green">${formatCurrency(val)}</td>
+                              </tr>
+                          `;
+                      }
+                  }
+             }
+
+             if(obs.market_prices) {
+                 marketTable.innerHTML = '';
+                 const keys = Object.keys(obs.market_prices);
+                 // Also update dropdown
+                 symbolSelect.innerHTML = '';
+                 for(let k of keys) {
+                      symbolSelect.innerHTML += `<option value="${k}">${k}</option>`;
+                      marketTable.innerHTML += `
+                          <tr>
+                              <td style="font-weight: 500">${k}</td>
+                              <td class="monospace">${formatCurrency(obs.market_prices[k])}</td>
+                          </tr>
+                      `;
+                 }
+                 if(keys.length === 0) {
+                      marketTable.innerHTML = '<tr><td colspan="2">Market data unavailable.</td></tr>';
+                 }
+             }
+        }
+
+        // Overwrite standard fetch to intercept Observation
+        const originalPostReset = postReset;
+        postReset = async function() {
+            try {
+                document.body.classList.add('loading');
+                logToTerminal('Resetting environment...');
+                const res = await fetch('/web/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                
+                logToTerminal('Environment reset successfully.', 'success');
+                if(data.observation) updateUIFromObservation(data.observation);
+                
+                // Fetch state just to get step tracking
+                const stateRes = await fetch('/web/state');
+                const state = await stateRes.json();
+                stepCounter.innerText = `Step: ${state.step_count || 0}`;
+
+            } catch (err) {
+                logToTerminal('Reset failed: ' + err.message, 'error');
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        }
+
+        const originalPostStep = postStep;
+        postStep = async function(action) {
+             try {
+                document.body.classList.add('loading');
+                if (action.action.tool_name === "place_stock_order") {
+                     logToTerminal(`Executing ${action.action.tool_args.side.toUpperCase()} ${action.action.tool_args.qty} ${action.action.tool_args.symbol}...`);
+                } else {
+                     logToTerminal(`Executing HOLD...`);
+                }
+                
+                const res = await fetch('/web/step', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(action)
+                });
+                
+                const data = await res.json();
+                if(!res.ok) throw new Error(JSON.stringify(data.detail) || "Unknown error");
+                
+                const obs = data.observation;
+                
+                if (obs && obs.error) {
+                    logToTerminal(`Action Failed: ${obs.error}`, 'error');
+                } else {
+                    let resultText = "Success.";
+                    if(obs && obs.result && obs.result.length > 0) {
+                        resultText = obs.result.map(r => r.text || r.content || "").join(" ");
+                    }
+                    if(obs && obs.reward !== undefined) {
+                         resultText += ` (Reward: ${obs.reward.toFixed(2)})`;
+                    }
+                    logToTerminal(resultText, 'success');
+                }
+                
+                if(obs) updateUIFromObservation(obs);
+
+                const stateRes = await fetch('/web/state');
+                const state = await stateRes.json();
+                stepCounter.innerText = `Step: ${state.step_count || 0}`;
+
+            } catch (err) {
+                logToTerminal('Step failed: ' + err.message, 'error');
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        }
+
+        document.getElementById('btn-reset').addEventListener('click', postReset);
+        document.getElementById('btn-refresh').addEventListener('click', async () => {
+             // In openenv we must do a "Hold" or just state to get latest info without side effect. 
+             // But we can't get observation from /state. So we just refresh state numbers.
+             fetchState();
+             logToTerminal('State synced from backend server.');
+        });
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+             // Auto boot
+             logToTerminal("Connecting to OpenEnv Instance...");
+             postReset();
+        });
+    </script>
+</body>
+</html>

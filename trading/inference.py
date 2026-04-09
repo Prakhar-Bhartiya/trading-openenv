@@ -259,13 +259,15 @@ def run_task(task_id: str, client: OpenAI) -> float:
             initial_equity=initial_equity,
             final_equity=final_equity,
         )
-        score = min(max(score, 0.0), 1.0)  # Clamp to [0, 1]
+        score = max(0.01, min(score, 0.99))  # Strictly clamp to (0, 1)
         success = score >= 0.1
 
     except Exception as e:
         print(f"[DEBUG] Task '{task_id}' error: {e}", flush=True)
 
     finally:
+        # Final safety clamp
+        score = max(0.01, min(score, 0.99))
         # ── [END] ── (always emitted, even on exception)
         log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
@@ -290,8 +292,8 @@ def main():
             run_task(task_id, client)
         except Exception as e:
             print(f"[DEBUG] Task '{task_id}' crashed: {e}", flush=True)
-            # Always emit [END] even on crash
-            log_end(success=False, steps=0, score=0.0, rewards=[])
+            # Always emit [END] even on crash, with completely valid score
+            log_end(success=False, steps=0, score=0.01, rewards=[])
 
 
 if __name__ == "__main__":

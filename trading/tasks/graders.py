@@ -222,7 +222,7 @@ def grade_trajectory(
         final_equity: The final equity at end of episode
 
     Returns:
-        Score in [0.0, 1.0]
+        Score in (0.0, 1.0)
 
     Raises:
         KeyError: If task_id is unknown
@@ -234,9 +234,12 @@ def grade_trajectory(
     task_config = TASKS[task_id]
     grader_fn = _GRADER_REGISTRY[task_id]
 
-    return grader_fn(
+    raw_score = grader_fn(
         trajectory=trajectory,
         initial_equity=initial_equity,
         final_equity=final_equity,
         params=task_config.grader_params,
     )
+    
+    # Ensure score is strictly in (0, 1) to pass validation
+    return _clamp(raw_score, 0.01, 0.99)

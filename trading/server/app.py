@@ -49,6 +49,20 @@ app = create_app(
     max_concurrent_envs=1,  # increase this number to allow more concurrent WebSocket sessions
 )
 
+import os
+from fastapi.responses import HTMLResponse
+
+# Remove the default "/" redirect route added by OpenEnv so our dashboard takes precedence
+for route in list(app.router.routes):
+    if getattr(route, "path", None) == "/" and "GET" in getattr(route, "methods", []):
+        app.router.routes.remove(route)
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def custom_landing_page():
+    html_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+    with open(html_path, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
 
 def main(host: str = "0.0.0.0", port: int = 8000):
     """
